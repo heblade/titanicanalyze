@@ -57,32 +57,37 @@ def startjob():
     #Logistc回归
     lr = LogisticRegression(penalty='l2')
     lr.fit(x_train, y_train)
-    y_hat = lr.predict(x_test)
+    # y_hat = lr.predict(x_test)
+    y_hat = lr.predict(x_train)
     print('Logistic回归: ', y_hat)
-    dftest['Survived'] = y_hat
-    dftest.to_csv(outputcsv % ('PredictbyLogisticRegression'), encoding='utf-8')
-    # show_accuracy(y_hat, y_test, 'Logistic回归')
+    dftrain['Survived_hat'] = y_hat
+    dftrain.to_csv(outputcsv % ('PredictbyLogisticRegression'), encoding='utf-8')
+    show_accuracy(y_hat, y_train, 'Logistic回归')
 
     #随机森林
     rfc = RandomForestClassifier(n_estimators= 100)
     rfc.fit(x_train, y_train)
-    y_hat = rfc.predict(x_test)
+    # y_hat = rfc.predict(x_test)
+    y_hat = rfc.predict(x_train)
     print('随机森林: ', y_hat)
-    dftest['Survived'] = y_hat
-    dftest.to_csv(outputcsv % ('PredictbyRandomForestClassifier'), encoding='utf-8')
-    # show_accuracy(y_hat, y_test, '随机森林')
+    dftrain['Survived_hat'] = y_hat
+    dftrain.to_csv(outputcsv % ('PredictbyRandomForestClassifier'), encoding='utf-8')
+    show_accuracy(y_hat, y_train, '随机森林')
 
     #XGBoost
     data_train = xgb.DMatrix(x_train, label=y_train)
-    data_test = xgb.DMatrix(x_test, label=y_test)
-    watch_list = [(data_test, 'eval'), (data_train, 'train')]
+    # data_test = xgb.DMatrix(x_test, label=y_test)
+    # watch_list = [(data_test, 'eval'), (data_train, 'train')]
+    watch_list = [(data_train, 'train')]
     param = {'max_depth':3, 'eta': 0.1, 'silent': 1, 'objective': 'binary:logistic'}
     bst = xgb.train(param, data_train, num_boost_round=100, evals=watch_list)
-    y_hat = bst.predict(data_test)
+    # y_hat = bst.predict(data_test)
+    y_hat = bst.predict(data_train)
     print('XGBoost: ', y_hat)
-    dftest['Survived'] = y_hat
-    dftest.to_csv(outputcsv % ('PredictbyXGBoost'), encoding='utf-8')
-    # show_accuracy(y_hat, y_test, 'XGBoost')
+    # dftest['Survived'] = y_hat
+    dftrain['Survived_hat'] = y_hat
+    dftrain.to_csv(outputcsv % ('PredictbyXGBoost'), encoding='utf-8')
+    show_accuracy(y_hat, y_train, 'XGBoost')
 
 def show_accuracy(y_hat, y_test, algorithmname):
     if(len(y_hat) != len(y_test)):
